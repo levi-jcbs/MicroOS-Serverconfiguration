@@ -124,7 +124,7 @@ Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines 
 Zuerst muss man den User-Service von podman aktivieren:
 
 ```bash
-systemctl --user enable podman.socket
+systemctl --user enable --now podman.socket
 ```
 
 ### Bennenung von Apps
