@@ -92,17 +92,6 @@ Es müssen die User **public** und **server** angelegt werden.
 
 Das ist am einfachsten über Cockpit möglich. Alternativ mit `useradd -mU USERNAME` und `passwd USERNAME`. Wichtig ist, dass der User seine **eigene gleichnamige Primärgruppe** und das Homeverzeichnis die Berechtigung **700** hat.
 
-> **Folgender Teil ist nur auf Grund einer Fehlkonfiguration von MicroOS notwendig, die bald gepatcht wird.**
->
-> Als nächster Schritt muss das sudo-Verhalten verändert werden, damit man in Cockpit den administrativen Zugang aktivieren kann. Dauerhaft sollte man in Cockpit nicht als root angemeldet sein, weil die Podman Container als User **server** laufen, und man diese in der root-Oberfläche nicht angezeigt bekommt.
->
-> Dafür unkommentiert man folgende Zeilen in der sudoers Datei über `visudo`:
->
-> ```
-> # Defaults targetpw
-> # ALL ALL=(ALL:ALL) ALL
-> ```
-
 Zuguterletzt muss **User Lingering** aktiviert werden, damit User Prozesse, in diesem Fall also die Server Prozesse, sofort bei Start des Computers hochgefahren werden und nicht erst, wenn sich der User anmeldet:
 
 ```bash
