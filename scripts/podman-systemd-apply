@@ -7,15 +7,11 @@ for i in ~/.config/systemd/user/pod-*.service; do
     systemctl --user disable --now ${i##*/}
 done
 
-echo -e "\033[32mRemove all pods in systemd user directory...\033[0m"
-rm ~/.config/systemd/user/pod-*.service
-echo -e "\033[32mRemove all containers in systemd user directory...\033[0m"
-rm ~/.config/systemd/user/container-*.service
+echo -e "\033[32mRemove all pods, container and extensions in systemd user directory...\033[0m"
+rm ~/.config/systemd/user/{pod,container,extension}-*.{service,timer}
 
-echo -e "\033[32mCopying all pods from ~/systemd/ to systemd user directory...\033[0m"
-cp ~/systemd/*/pod-*.service ~/.config/systemd/user/
-echo -e "\033[32mCopying all containers from ~/systemd/ to systemd user directory...\033[0m"
-cp ~/systemd/*/container-*.service ~/.config/systemd/user/
+echo -e "\033[32mCopying all pods, container and extensions from ~/systemd/ to systemd user directory...\033[0m"
+cp ~/systemd/*/{pod,container,extension}-*.{service,timer} ~/.config/systemd/user/
 
 echo -e "\033[32mReload systemd daemon...\033[0m"
 systemctl --user daemon-reload

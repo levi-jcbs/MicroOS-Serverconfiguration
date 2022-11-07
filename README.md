@@ -82,6 +82,7 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 
 - nano
 - emacs
+- tmux
 - wget
 - tuned
 - tuned-profiles-atomic
@@ -189,6 +190,10 @@ Vor dem Namen des Containers sollte die ID stehen, damit es bei gleichen Kompone
 Um das automatisierte Starten und einfache administrieren zu gewährleisten, werden alle Applications in Systemd Units gesteckt. Diese liegen in eigenen Ordner (für jede Application) in `~/systemd/`. Jede Application hat eine Unit-Datei für den Pod und eine oder mehrere für dazugehörige Container. All diese können von einem laufendem Pod einfach mit `podman generate systemd --files --new --name xx_name` generiert werden (Aufpassen, dass der Befehl im zu dem Pod gehörigen Ordner ausgeführt wird!).
 
 Um seine Systemd-Konfiguration anzuwenden, führt man einfach `podman-systemd-apply` aus. Dieses Script stoppt alle Pods, kopiert die neue Konfiguration zu Systemd und wendet sie an und startet alles wieder. Es geht Blitzschnell.
+
+### Application Extensions
+
+Einige wenige Applications benötigen Services, die außerhalb von Containern laufen und beispielsweise Befehle in Containern ausführen, oder, als Timer Container in bestimmten Abständen starten. Diese Unit Dateien nenne ich Extensions, weil sie an sich kein Container und kein Pod sind, aber bei `podman-systemd-apply` gleich behandelt werden. Sie müssen mit **extension-** beginnen. Beispielsweise **extension-01_nextcloud_cron.timer**.
 
 ## Userrolle: public (Reverse Proxy / Gateway Server)
 
