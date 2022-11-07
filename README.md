@@ -129,7 +129,7 @@ systemctl --user enable --now podman.socket
 
 ### Bennenung von Apps
 
-Alle Applications werden mit einer führenden Null durchnummeriert und tragen den diese ID von der Bezeichnung mit Unterstrichen getrennt im Namen. Zum Beispiel **04_mein_erste_testapp**.
+Alle Applications werden mit einer führenden Null durchnummeriert und tragen den diese ID von der Bezeichnung mit Unterstrichen getrennt im Namen. Zum Beispiel **04_mein_erste_testapp**. Die Namen werden auf Verzeichnisse und Pods angewandt.
 
 ### Verzeichnisstruktur
 
@@ -147,6 +147,38 @@ Apps dürfen die Ports **80xx** für HTTP und **22xx** für SSH nutzen. **xx** s
 ### Application einrichten
 
 Jede Application hat in Podman einen Pod. Ein Pod ist eine Gruppe von Containern (Komponenten der Application). Alle Container in dem Pod der Application teilen das selbe Netzwerk, localhost und Portfreigaben.
+
+Um eine Application einzurichten, muss man also
+
+- Einen Pod erstellen (Auf Namen achten)
+- Container Image(s) importieren oder pullen
+- Zu Pod zugehörige(n) Containe erstellen
+
+#### Pod erstellen
+
+Beim Erstellen eines Pods sollten die öffentlichen Ports angegeben werden, da dies sowieso auf alle Container angewandt wird. Grundlegende Podkonfiguration:
+
+```bash
+podman pod create --replace --userns= --publish 80xx:80 xx_name
+```
+
+#### Container erstellen
+
+Beim Erstellen von Containern werden dann Container-spezifisch **Storage Mounts**, **Env-Variablen** etc. angegeben. Grundlegende Containerkonfiguration:
+
+```bash
+podman run --replace --detach --volume ~/apps/xx_name/:/app/:Z --pod [new:]xx_name --name xx_image image
+```
+
+Wenn die Application nur aus einem Container besteht, kann auf die Erstellung von Pods verzichtet werden, und beim erstellen des Containers mit `--pod new:xx_name` der Pod direkt miterstellt werden.
+
+Vor dem Namen des Containers sollte die ID stehen, damit es bei gleichen Komponenten in mehreren Applications keine Namensduplikate gibt. Beispielsweise werden oft viele mariadb Container genutzt, für alle Möglichen Applications. Es können nicht alle **mariadb** heißen, deswegen nennt man sie einfach **xx_mariadb**. 
+
+### Applications verwalten
+
+Um das automatisierte Starten und einfache administrieren zu gewährleisten, werden alle Applications in Systemd Units gesteckt. Diese liegen in eigenen Ordner (für jede Application) in `~/systemd/`. Jede Application hat eine Unit-Datei für den Pod und eine oder mehrere für dazugehörige Container. All diese können von einem laufendem Pod einfach mit `podman generate systemd --files --new --name xx_name` generiert werden (Aufpassen, dass der Befehl im zu dem Pod gehörigen Ordner ausgeführt wird!).
+
+Um seine Systemd-Konfiguration anzuwenden, führt man einfach `podman-systemd-apply` aus. Dieses Script stoppt alle Pods, kopiert die neue Konfiguration zu Systemd und wendet sie an und startet alles wieder. Es geht Blitzschnell.
 
 ## Userrolle: public (Reverse Proxy / Gateway Server)
 
