@@ -193,7 +193,9 @@ Um seine Systemd-Konfiguration anzuwenden, führt man einfach `podman-systemd-ap
 
 ### Application Extensions
 
-Einige wenige Applications benötigen Services, die außerhalb von Containern laufen und beispielsweise Befehle in Containern ausführen, oder, als Timer Container in bestimmten Abständen starten. Diese Unit Dateien nenne ich Extensions, weil sie an sich kein Container und kein Pod sind, aber bei `podman-systemd-apply` gleich behandelt werden. Sie müssen mit **extension-** beginnen. Beispielsweise **extension-01_nextcloud_cron.timer**.
+Einige wenige Applications benötigen Services, die außerhalb von Containern laufen und beispielsweise Befehle in Containern ausführen oder als Timer Container in bestimmten Abständen starten. Diese Unit Dateien nenne ich Extensions, weil sie an sich kein Container und kein Pod sind, aber bei `podman-systemd-apply` trotzdem so behandelt werden. Sie müssen mit **extension-** beginnen. Beispielsweise **extension-01_nextcloud_cron.timer**.
+
+Damit Extensions beim Start des der Application (des Pods) mitstarten, müssen sie in der Unitdatei des Pods unter **Requires=** und **Before=** eingetragen werden.
 
 ## Userrolle: public (Reverse Proxy / Gateway Server)
 
