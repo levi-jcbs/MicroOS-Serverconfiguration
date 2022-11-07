@@ -69,7 +69,12 @@ firewall-cmd --add-service=cockpit --permanent
 firewall-cmd --reload
 ```
 
-Das VM Addon von Cockpit ist auf **libvirtd** angewiesen, welches über systemd aktiviert werden muss: `systemctl enable --now libvirtd.socket`
+Cockpit Addons sind auf **libvirtd** und **tuned** angewiesen, welche über systemd aktiviert werden müssen: 
+
+```bash
+systemctl enable --now libvirtd.socket`
+systemctl enable --now tuned.service`
+```
 
 ### Zusatzpakete installieren
 
