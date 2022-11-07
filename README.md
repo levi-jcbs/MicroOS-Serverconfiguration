@@ -153,6 +153,13 @@ Alle Applications werden mit einer führenden Null durchnummeriert und tragen de
 
 Apps dürfen die Ports **80xx** für HTTP und **22xx** für SSH nutzen. **xx** steht dabei für die ID der Application.
 
+Diese Ports müssen natürlich in der Firewall  erlaubt werden. Das geht über Cockpit *Network > Firewall > Edit rules and zones*. Alternativ über die Kommandozeile:
+
+```bash
+firewall-cmd --add-port=8001-8099/tcp --permanent
+firewall-cmd --reload
+```
+
 ### Application einrichten
 
 Jede Application hat in Podman einen Pod. Ein Pod ist eine Gruppe von Containern (Komponenten der Application). Alle Container in dem Pod der Application teilen das selbe Netzwerk, localhost und Portfreigaben.
@@ -176,7 +183,7 @@ podman pod create --replace --userns= --publish 80xx:80 xx_name
 Beim Erstellen von Containern werden dann Container-spezifisch **Storage Mounts**, **Env-Variablen** etc. angegeben. Grundlegende Containerkonfiguration:
 
 ```bash
-podman run --replace --detach --volume ~/apps/xx_name/:/app/:Z --pod [new:]xx_name --name xx_image image
+podman run --replace --detach --pod [new:]xx_name --volume ~/apps/xx_name/:/app/:Z --name xx_image image
 ```
 
 Wenn die Application nur aus einem Container besteht, kann auf die Erstellung von Pods verzichtet werden, und beim erstellen des Containers mit `--pod new:xx_name` der Pod direkt miterstellt werden.
