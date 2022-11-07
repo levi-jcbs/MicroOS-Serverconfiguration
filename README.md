@@ -77,6 +77,7 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 
 - nano
 - emacs
+- wget
 - tuned
 - tuned-profiles-atomic
 
@@ -121,10 +122,18 @@ Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines 
 
 ## Userrolle: server (Applications)
 
+### Installation
+
 Zuerst muss man den User-Service von podman aktivieren:
 
 ```bash
 systemctl --user enable --now podman.socket
+```
+
+Und dann das Script `podman-systemd-apply` von Github in den `~/bin/` Ordner herunterladen und mit `chmod u+x ~/bin/podman-systemd-apply` ausführbar machen:
+
+```bash
+wget -O ~/bin/podman-systemd-apply https://raw.githubusercontent.com/levi-jcbs/MicroOS-Serverkonfiguration/main/scripts/podman-systemd-apply
 ```
 
 ### Bennenung von Apps
