@@ -24,7 +24,7 @@ ExecStart=/usr/bin/podman run \
 	--sdnotify=conmon \
 	--replace \
 	--detach \
-	--volume /home/server/apps/XX_APPLICATION_NAME/DATABASE_DIR/:/var/lib/mysql/:Z \
+	--volume /home/server/apps/XX_APPLICATION_NAME/mariadb/:/var/lib/mysql/:Z \
 	--name XX_mariadb \
 	--env MYSQL_DATABASE=nextcloud \
 	--env MYSQL_USER=nextcloud \

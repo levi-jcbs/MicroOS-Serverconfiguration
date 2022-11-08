@@ -30,8 +30,8 @@ ExecStart=/usr/bin/podman run \
 	--env MYSQL_PASSWORD=DATABASE_PASSWORD \
 	--env OVERWRITEHOST=NEXTCLOUD_ADDRESS \
 	--env OVERWRITEPROTOCOL=NEXTCLOUD_PROTOCOL \
-	--volume /home/server/apps/XX_APPLICATION_NAME/NEXTCLOUD_APP_DIR/:/var/www/html/:Z \
-	--volume /home/server/apps/XX_APPLICATION_NAME/NEXTCLOUD_DATA_DIR/:/var/www/html/data/:Z \
+	--volume /home/server/apps/XX_APPLICATION_NAME/app/:/var/www/html/:Z \
+	--volume /home/server/apps/XX_APPLICATION_NAME/data/:/var/www/html/data/:Z \
 	--name XX_nextcloud nextcloud
 ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
 ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
