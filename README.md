@@ -100,8 +100,7 @@ Das ist am einfachsten über Cockpit möglich. Alternativ mit `useradd -mU USERN
 Zuguterletzt muss **User Lingering** aktiviert werden, damit User Prozesse, in diesem Fall also die Server Prozesse, sofort bei Start des Computers hochgefahren werden und nicht erst, wenn sich der User anmeldet:
 
 ```bash
-loginctl enable-linger server
-loginctl enable-linger public
+loginctl enable-linger server public
 ```
 
 ### SSH
@@ -204,3 +203,5 @@ Damit Extensions beim Start des der Application (des Pods) mitstarten, müssen s
 ## Userrolle: public (Reverse Proxy / Gateway Server)
 
 Kommt.
+
+## Userrolle: root (Datensicherheit)
