@@ -91,6 +91,10 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 - tmux
 - wget
 
+### rebootmgr: Zeitfenster zum Neustart
+
+openSUSE stellt ein Programm namens **rebootmgr** bereit, in dem man einstellen, kann wann das System automatisiert neustarten darf, um z.B. Updates anzuwenden. In der Standardkonfiguration liegt dieses Zeitfenster bei **03:30:00 für 1h30min**. Dies kann man ändern mit dem Befehl `rebootmgrctl`.
+
 ### Usermanagement
 
 Es müssen die User **public** und **server** angelegt werden.
