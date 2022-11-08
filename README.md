@@ -78,8 +78,8 @@ firewall-cmd --reload
 Cockpit Addons sind auf **libvirtd** und **tuned** angewiesen, welche über systemd aktiviert werden müssen: 
 
 ```bash
-systemctl enable --now libvirtd.socket`
-systemctl enable --now tuned.service`
+systemctl enable --now libvirtd.socket
+systemctl enable --now tuned.service
 ```
 
 ### Zusatzpakete installieren
