@@ -63,6 +63,8 @@ Cockpit und optional folgende Addons installieren (`transactional-update pkg in 
 - cockpit-podman
 - cockpit-storaged
 - cockpit-tukit
+- tuned
+- tuned-profiles-atomic
 
 Danach Rebooten.
 
@@ -88,8 +90,6 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 - emacs
 - tmux
 - wget
-- tuned
-- tuned-profiles-atomic
 
 ### Usermanagement
 
