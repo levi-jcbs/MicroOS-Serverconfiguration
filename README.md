@@ -155,6 +155,7 @@ Diese Ports müssen natürlich in der Firewall  erlaubt werden. Das geht über C
 
 ```bash
 firewall-cmd --add-port=8001-8099/tcp --permanent
+firewall-cmd --add-port=2201-2299/tcp --permanent
 firewall-cmd --reload
 ```
 
@@ -187,6 +188,12 @@ podman run --replace --detach --pod [new:]xx_name --volume ~/apps/xx_name/:/app/
 Wenn die Application nur aus einem Container besteht, kann auf die Erstellung von Pods verzichtet werden, und beim erstellen des Containers mit `--pod new:xx_name` der Pod direkt miterstellt werden.
 
 Vor dem Namen des Containers sollte die ID stehen, damit es bei gleichen Komponenten in mehreren Applications keine Namensduplikate gibt. Beispielsweise werden oft viele mariadb Container genutzt, für alle Möglichen Applications. Es können nicht alle **mariadb** heißen, deswegen nennt man sie einfach **xx_mariadb**. 
+
+#### Production
+
+Für gewöhnlich werden Applications in Production nicht auf dem Server manuell (über oben genannte Befehle) erstellt, sondern von Admins auf einem Testcomputer.
+
+Um die Applications dann vom Testcomputer auf den Production Server zu migrieren, werden dann die **systemd Unit Dateien der App** kopiert. Wie diese erstellt werden, wird im folgenden Abschnitt erklärt:
 
 ### Applications verwalten
 
