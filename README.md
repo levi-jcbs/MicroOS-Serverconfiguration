@@ -229,4 +229,5 @@ Beachte, dass der Name der Application natürlich keine Leerzeichen enthalten da
 
 ### Nextcloud
 
-Für Nextcloud werden folgende Images benötigt: **nextcloud**, **mariadb**.
+Für Nextcloud werden folgende Images benötigt: **nextcloud**, **mariadb**. Im **apps**-Verzeichnis werden folgende App-Unterordner benötigt: **app**, **data**, **mariadb**.
+
