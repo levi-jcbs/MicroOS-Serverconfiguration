@@ -218,3 +218,15 @@ Kommt.
 ## Userrolle: root (Datensicherheit)
 
 Kommt.
+
+# Beispiele
+
+## systemd
+
+Die Systemd Beispiele für Applications müssen auf Namen und weitere Optionen angepasst werden. Dazu die Dateien aus dem Beispielordner der entsprechenden App in den finalen **~/systemd/XX_APP/** Ordner kopieren und **apply.sh** ausführen.
+
+Beachte, dass der Name der Application natürlich keine Leerzeichen enthalten darf. Auch Großbuchstaben sind unpraktisch.
+
+### Nextcloud
+
+Für Nextcloud werden folgende Images benötigt: **nextcloud**, **mariadb**.
