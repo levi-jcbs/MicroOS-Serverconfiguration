@@ -20,6 +20,10 @@ Es wird **openSUSE MicroOS** mit der Systemrolle **MicroOS Container Host** inst
 
 Zeitzone auf **Germany**, aber Hardware Clock auf **UTC** setzen.
 
+### Network
+
+Hostname setzen.
+
 ### Booting
 
 In **Bootloader Options** Timeout auf 3s setzen.
@@ -27,10 +31,6 @@ In **Bootloader Options** Timeout auf 3s setzen.
 ### Security
 
 Firewall aktivieren, SSH Service aktivieren und SSH port öffnen.
-
-### Network
-
-Hostname setzen.
 
 ## Konfiguration
 
