@@ -120,7 +120,7 @@ SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kan
 
 ```bash
 sudo transactional-update shell
-sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /usr/etc/ssh/sshd_config
+sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /usr/etc/ssh/sshd_config
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
 exit
 ```
