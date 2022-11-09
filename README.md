@@ -44,6 +44,13 @@ System mit `transactional-update dup` aktualisieren. Danach rebooten.
 
 ### Home Snapshots
 
+> Folgende Schritte sind auf Grund eines SELinux Konfigurationsfehlers (der hoffentlich bald gepatcht wird) nötig:
+>
+> ```bash
+> semanage fcontext -a -t snapperd_data_t '/home/\.snapshots(/.*)?'
+> restorecon -R -v /home/.snapshots/
+> ```
+
 Snapshots für die Home-Partition aktivieren:
 
 ```bash
