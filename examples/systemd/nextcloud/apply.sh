@@ -14,7 +14,6 @@ read -p "Root-Password der Datenbank:  " DATABASE_ROOT_PASSWORD
 echo ""
 echo "> NEXTCLOUD"
 
-read -p "Domain oder IP der Nextcloud: " NEXTCLOUD_ADDRESS
 read -p "Protokoll (http/https):       " NEXTCLOUD_PROTOCOL
 
 echo ""
@@ -36,7 +35,6 @@ if [ "$doit" == "j" ]; then
     sed -i -e "s/DATABASE_PASSWORD/${DATABASE_PASSWORD}/g" *.{service,timer}
     sed -i -e "s/DATABASE_ROOT_PASSWORD/${DATABASE_ROOT_PASSWORD}/g" *.{service,timer}
 
-    sed -i -e "s/NEXTCLOUD_ADDRESS/${NEXTCLOUD_ADDRESS}/g" *.{service,timer}
     sed -i -e "s/NEXTCLOUD_PROTOCOL/${NEXTCLOUD_PROTOCOL}/g" *.{service,timer}
 
     if [ "$remove_apply_sh" == "ja" ]; then

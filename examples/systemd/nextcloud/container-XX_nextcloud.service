@@ -28,7 +28,7 @@ ExecStart=/usr/bin/podman run \
 	--env MYSQL_DATABASE=nextcloud \
 	--env MYSQL_USER=nextcloud \
 	--env MYSQL_PASSWORD=DATABASE_PASSWORD \
-	--env OVERWRITEHOST=NEXTCLOUD_ADDRESS \
+	--env TRUSTED_PROXIES=10.0.2.100 \
 	--env OVERWRITEPROTOCOL=NEXTCLOUD_PROTOCOL \
 	--volume /home/server/apps/XX_APPLICATION_NAME/app/:/var/www/html/:Z \
 	--volume /home/server/apps/XX_APPLICATION_NAME/data/:/var/www/html/data/:Z \
