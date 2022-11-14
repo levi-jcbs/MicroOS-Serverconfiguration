@@ -1,6 +1,6 @@
 # Serverkonfiguration
 
-*Version a1, 06.11.2022*
+*Version a1, 14.11.2022*
 
 [toc]
 
