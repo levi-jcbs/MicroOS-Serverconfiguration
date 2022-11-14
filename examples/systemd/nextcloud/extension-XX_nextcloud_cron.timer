@@ -1,10 +1,11 @@
 [Unit]
 Description=Run Nextcloud Cronjob every 5 minutes
+DefaultDependencies=no
 Requires=container-XX_nextcloud.service
 After=container-XX_nextcloud.service
 
 [Timer]
-OnActiveSec=5min
+OnActiveSec=1min
 OnUnitActiveSec=5min
 Unit=extension-XX_nextcloud_cron.service
 
