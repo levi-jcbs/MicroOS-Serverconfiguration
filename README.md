@@ -42,23 +42,6 @@ Mit `zypper lr -u` Repos auflisten und alle USB/CD/DVD Repos mit `zypper rr` ent
 
 System mit `transactional-update dup` aktualisieren. Danach rebooten.
 
-### Home Snapshots
-
-> Folgende Schritte sind auf Grund eines SELinux Konfigurationsfehlers (der hoffentlich bald gepatcht wird) nötig:
->
-> ```bash
-> semanage fcontext -a -t snapperd_data_t '/home/\.snapshots(/.*)?'
-> restorecon -R -v /home/.snapshots/
-> ```
-
-Snapshots für die Home-Partition aktivieren:
-
-```bash
-snapper -c home create-config /home
-```
-
-Die Anzahl der Snapshots, die gemacht werden sollen, um Daten zu sichern, kann man unter `/etc/snapper/configs/` in den Konfigurationsdateien ändern.
-
 ### Cockpit installieren
 
 Cockpit und optional folgende Addons installieren (`transactional-update pkg in PAKET`):
@@ -113,6 +96,23 @@ Für gewöhnlich arbeite ich mit einem Maintenance Window von **03:00:00 Uhr fü
 ```bash
 sudo rebootmgrctl set-window 03:00:00 1h
 ```
+
+### Home Snapshots
+
+> Folgende Schritte sind auf Grund eines SELinux Konfigurationsfehlers (der hoffentlich bald gepatcht wird) nötig:
+>
+> ```bash
+> semanage fcontext -a -t snapperd_data_t '/home/\.snapshots(/.*)?'
+> restorecon -R -v /home/.snapshots/
+> ```
+
+Snapshots für die Home-Partition aktivieren:
+
+```bash
+snapper -c home create-config /home
+```
+
+Die Anzahl der Snapshots, die gemacht werden sollen, um Daten zu sichern, kann man unter `/etc/snapper/configs/` in den Konfigurationsdateien ändern.
 
 ### Usermanagement
 
