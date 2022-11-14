@@ -36,7 +36,7 @@ Firewall aktivieren, SSH Service aktivieren und SSH port öffnen.
 
 ### (Ggf.) Installationsrepo löschen
 
-Mit `zypper ref` überprüfen, ob ein USB-Repo, welches manchmal von der Installation übrig bleibt, fehlschlägt - also noch nicht entfernt wurde. Wenn dies der Fall ist mit `zypper lr` Repos auflisten und USB Repo mit `zypper rr` entfernen.
+Mit `zypper lr -u` Repos auflisten und alle USB/CD/DVD Repos mit `zypper rr` entfernen. Dieses bleibt nach der Installation manchmal übrig und es kann nicht mehr drauf zugegriffen werden, wenn das Installationsmedium entfernt wird.
 
 ### System aktualisieren
 
