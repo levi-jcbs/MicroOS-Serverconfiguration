@@ -102,6 +102,18 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 
 openSUSE stellt ein Programm namens **rebootmgr** bereit, in dem man einstellen, kann wann das System automatisiert neustarten darf, um z.B. Updates anzuwenden. In der Standardkonfiguration liegt dieses Zeitfenster bei **03:30:00 für 1h30min**. Dies kann man ändern mit dem Befehl `rebootmgrctl`.
 
+Damit sich der PC strikt an das Zeitfenster hält (was für Server durchaus wichtig ist), muss die "Strategie" von rebootmgr auf **maint-window** gestellt werden:
+
+```bash
+sudo rebootmgrctl set-strategy maint-window
+```
+
+Für gewöhnlich arbeite ich mit einem Maintenance Window von **03:00:00 Uhr für 1 Stunde**. Bei dem Bettieb High Avaibility Applications muss in dieser Zeit ein Backupserver laufen.
+
+```bash
+sudo rebootmgrctl set-window 03:00:00 1h
+```
+
 ### Usermanagement
 
 Es müssen die User **public** und **server** angelegt werden.
