@@ -103,6 +103,7 @@ sudo rebootmgrctl set-window 03:00:00 1h
 >
 > ```bash
 > semanage fcontext -a -t snapperd_data_t '/home/\.snapshots(/.*)?'
+> mkdir /home/.snapshots/
 > restorecon -R -v /home/.snapshots/
 > ```
 
