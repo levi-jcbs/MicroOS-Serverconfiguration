@@ -1,6 +1,0 @@
-[Unit]
-Description=Nextcloud Cronjob
-
-[Service]
-Type=oneshot
-ExecStart=podman exec --user www-data XX_nextcloud php -f /var/www/html/cron.php
