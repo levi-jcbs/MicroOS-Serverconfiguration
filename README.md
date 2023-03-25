@@ -4,11 +4,13 @@
 
 [toc]
 
-## Beschreibung
+## Cluster Beschreibung
 
 ### Ziel
 
 Das Ziel ist ein ein production fertiges zweieinhalb node Cluster, welches Requests von Extern an mehrere Applications weiterleitet.
+
+Der ersten beiden Server sollten leistungsstark sein, auf diesen laufen die Applications. Der dritte Server dient lediglich dazu den High-Availability Status auch für das etcd Cluster zu erreichen, wozu man mindestens drei Nodes benötigt. Dieser kann auf einem leistungsschwachen PC, wie einem Raspberry Pi gehostet werden.
 
 ### Struktur
 
@@ -40,9 +42,9 @@ Client   »»»   |  Router  |         |                    |
                                                        ...
 ```
 
-## Installation
+## Node Installation
 
-Es wird **openSUSE MicroOS** mit der Systemrolle **MicroOS Container Host** installiert.
+Es wird **openSUSE MicroOS** mit der Systemrolle **MicroOS Container Host** installiert. Für den **etcd Node** kann die **Standard-Systemrolle** ausgewählt werden.
 
 ### Partitionierung
 
@@ -68,7 +70,7 @@ In **Bootloader Options** Timeout auf 3s setzen.
 
 Firewall aktivieren, SSH Service aktivieren und SSH port öffnen.
 
-## Konfiguration
+## Node Konfiguration
 
 ### (Ggf.) Installationsrepo löschen
 
@@ -101,10 +103,9 @@ firewall-cmd --add-service=cockpit --permanent
 firewall-cmd --reload
 ```
 
-Cockpit Addons sind auf **libvirtd** und **tuned** angewiesen, welche über systemd aktiviert werden müssen: 
+Cockpit Addons sind auf **tuned** angewiesen, welches über systemd aktiviert werden muss: 
 
 ```bash
-systemctl enable --now libvirtd.socket
 systemctl enable --now tuned.service
 ```
 
@@ -112,7 +113,6 @@ systemctl enable --now tuned.service
 
 Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 
-- nano
 - emacs
 - tmux
 - wget
@@ -123,7 +123,7 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 >
 > ```bash
 > semanage fcontext -a -t snapperd_data_t '/home/\.snapshots(/.*)?'
-> mkdir /home/.snapshots/
+> snapper -c home create-config /home
 > restorecon -R -v /home/.snapshots/
 > ```
 
@@ -154,6 +154,7 @@ SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kan
 ```bash
 sudo transactional-update shell
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
+sed -i 's/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' /usr/etc/ssh/sshd_config
 exit
 ```
 
