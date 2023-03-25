@@ -15,29 +15,29 @@ Das Ziel ist ein ein production fertiges zweieinhalb node Cluster, welches Reque
 #### Server
 
 ```
-										+----k3s-cluster----+
-				+-----------+   »»»		| Primary Server	|
-Client	»»»		|	Router	|			|					|
-				+-----------+  (»»»)	| Secondary Server	|
-										|					|
-										| etcd Server		|
-										+-------------------+
+                                    +----k3s-cluster-----+
+               +----------+   »»»   |  Primary Server    |
+Client   »»»   |  Router  |         |                    |
+               +----------+  (»»»)  |  Secondary Server  |
+                                    |                    |
+                                    |  etcd Server       |
+                                    +--------------------+
 ```
 
 #### Inside Cluster
 
 ```
-		+--------------------------------------Primary/Secondary-Node---------------------------------------+
-		|									+-----------------------App-Namespace-----------------------+	|
-»»»		|	Ingress Reverse Proxy	»»»		|	External Webserver Service	»»» Deployment	»»» Pod(s)	|	|
-		|									|													 |		|	|
-		|									|  				««««««««««««««««««««««««««««««««««««««		|	|
-		|									|				|											|	|
-		|									|	Internal Database Service	»»»	StatefulSet	»»»	Pod(s)	|	|
-		|									+-----------------------------------------------------------+	|
-		|																	...								|
-		+---------------------------------------------------------------------------------------------------+
-														...
+      +---------------------------------------Primary/Secondary-Node----------------------------------------+
+      |                                +--------------------------App-Namespace--------------------------+  |
+»»»   |  Ingress Reverse Proxy   »»»   |  External Webserver Service   »»»   Deployment    »»»   Pod(s)  |  |
+      |                                |                                                          |      |  |
+      |                                |                «««         ConfigMap & Secrets         «««      |  |
+      |                                |                |                                                |  |
+      |                                |  Internal Database Service    »»»   StatefulSet   »»»   Pod(s)	 |  |
+      |                                +-----------------------------------------------------------------+  |
+      |                                                                ...                                  |
+      +-----------------------------------------------------------------------------------------------------+
+                                                       ...
 ```
 
 ## Installation
@@ -144,7 +144,7 @@ Das ist am einfachsten über Cockpit möglich. Alternativ mit `useradd -mU USERN
 Zuguterletzt muss **User Lingering** aktiviert werden, damit User Prozesse sofort bei Start des Computers hochgefahren werden und nicht erst, wenn sich der User anmeldet:
 
 ```bash
-loginctl enable-linger server public
+loginctl enable-linger server
 ```
 
 ### SSH
