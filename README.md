@@ -80,6 +80,21 @@ Mit `zypper lr -u` Repos auflisten und alle USB/CD/DVD Repos mit `zypper rr` ent
 
 System mit `transactional-update dup` aktualisieren. Danach rebooten.
 
+### SSH
+
+SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden:
+
+```bash
+sudo transactional-update shell
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
+sed -i 's/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' /usr/etc/ssh/sshd_config
+exit
+```
+
+Anschließend das System neu starten.
+
+Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines Rechners unter *Accounts > server* eintragen.
+
 ### Cockpit installieren
 
 Cockpit und optional folgende Addons installieren (`transactional-update pkg in PAKET`):
@@ -147,22 +162,93 @@ Zuguterletzt muss **User Lingering** aktiviert werden, damit User Prozesse sofor
 loginctl enable-linger server
 ```
 
-### SSH
-
-SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden:
-
-```bash
-sudo transactional-update shell
-sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
-sed -i 's/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' /usr/etc/ssh/sshd_config
-exit
-```
-
-Anschließend das System neu starten.
-
-Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines Rechners unter *Accounts > server* eintragen.
-
 ## Kubernetes (k3s)
 
 ### Installation
 
+#### Preparation
+
+1. Configure Firewall
+	```bash
+	# Primary & Secondary Server
+	firewall-cmd --permanent --add-port=80/tcp
+	firewall-cmd --permanent --add-port=443/tcp
+	firewall-cmd --permanent --add-port=2376/tcp
+	firewall-cmd --permanent --add-port=2379/tcp
+	firewall-cmd --permanent --add-port=2380/tcp
+	firewall-cmd --permanent --add-port=6443/tcp
+	firewall-cmd --permanent --add-port=8472/udp
+	firewall-cmd --permanent --add-port=9099/tcp
+	firewall-cmd --permanent --add-port=10250/tcp
+	firewall-cmd --permanent --add-port=10254/tcp
+	firewall-cmd --permanent --add-port=30000-32767/tcp
+	firewall-cmd --permanent --add-port=30000-32767/udp
+	firewall-cmd --permanent --zone=trusted --add-source=10.42.0.0/16 # pods network
+	firewall-cmd --permanent --zone=trusted --add-source=10.43.0.0/16 # services network
+	firewall-cmd --reload
+	
+	# etcd Server
+	firewall-cmd --permanent --add-port=2376/tcp
+	firewall-cmd --permanent --add-port=2379/tcp
+	firewall-cmd --permanent --add-port=2380/tcp
+	firewall-cmd --permanent --add-port=8472/udp
+	firewall-cmd --permanent --add-port=9099/tcp
+	firewall-cmd --permanent --add-port=10250/tcp
+	firewall-cmd --reload
+	```
+
+#### Primary Server
+
+1. Install k3s
+
+   ```bash
+   curl -sfL https://get.k3s.io | sh -s - server --disable=traefik --cluster-init
+   ```
+
+2. Get k3s Secret Token
+
+   ```bash
+   cat /var/lib/rancher/k3s/server/node-token
+   ```
+
+#### Secondary Server
+
+Install k3s and join cluster using **k3s Token** and **hostname** of primary server
+
+```bash
+curl -sfL https://get.k3s.io | K3S_TOKEN=<K3S-TOKEN> sh -s - server --disable=traefik --server https://<PRIMARY-SERVER-HOSTNAME>:6443
+```
+
+#### etcd Server
+
+Install k3s etcd component to complete etcd cluster. You need the **k3s Token** and **hostname** of primary/secondary server again
+
+```bash
+curl -sfL https://get.k3s.io | K3S_TOKEN=<K3S-TOKEN> sh -s - server --disable-apiserver --disable-controller-manager --disable-scheduler --disable=traefik --server https://<PRIMARY/SECONDARY-SERVER-HOSTNAME>:6443
+```
+
+#### Helm Package Manager
+
+#### Entrypoint Ingress (Caddy)
+
+#### Storage Syncronisation (Syncthing)
+
+### Deploy Example
+
+#### Webserver
+
+##### Deployment
+
+##### Persistent Volume
+
+##### Service
+
+#### Database
+
+##### StatefulSet
+
+##### Persistent Volumes
+
+##### Service
+
+#### Ingress Configuration
