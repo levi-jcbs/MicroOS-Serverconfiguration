@@ -14,7 +14,7 @@ Der ersten beiden Server sollten leistungsstark sein, auf diesen laufen die Appl
 
 ### Struktur
 
-#### Server
+#### Cluster Network
 
 ```
                                     +----k3s-cluster-----+
@@ -26,7 +26,7 @@ Client   »»»   |  Router  |         |                    |
                                     +--------------------+
 ```
 
-#### Inside Cluster
+#### Kubernetes
 
 ```
       +---------------------------------------Primary/Secondary-Node----------------------------------------+
@@ -42,17 +42,23 @@ Client   »»»   |  Router  |         |                    |
                                                        ...
 ```
 
+#### Storage
+
+- Eine schnelle interne M.2 Festplatte **für das System** (min. 1 TB)
+- Ein RAID **für die Application Daten** (min. 2TB)
+
 ## Node Installation
 
 Es wird **openSUSE MicroOS** mit der Systemrolle **MicroOS Container Host** installiert. Für den **etcd Node** kann die **Standard-Systemrolle** ausgewählt werden.
 
 ### Partitionierung
 
-| Partition | Filesystem | Größe     |
-| --------- | ---------- | --------- |
-| /         | btrfs      | min. 50GB |
-| /var      | btrfs      | min. 50GB |
-| /home     | btrfs      | max.      |
+| Festplatte         | Partition | Filesystem | Größe     |
+| ------------------ | --------- | ---------- | --------- |
+| **System M.2 SSD** | /         | btrfs      | 50GB      |
+| **System M.2 SSD** | /var      | btrfs      | max.      |
+|                    |           |            |           |
+| **Data RAID**      | /data     | btrfs      | min. 2 TB |
 
 ### Zeitzone
 
@@ -72,15 +78,13 @@ Firewall aktivieren, SSH Service aktivieren und SSH port öffnen.
 
 ## Node Konfiguration
 
-### (Ggf.) Installationsrepo löschen
+### System aktualisieren
 
 Mit `zypper lr -u` Repos auflisten und alle USB/CD/DVD Repos mit `zypper rr` entfernen. Dieses bleibt nach der Installation manchmal übrig und es kann nicht mehr drauf zugegriffen werden, wenn das Installationsmedium entfernt wird.
 
-### System aktualisieren
-
 System mit `transactional-update dup` aktualisieren. Danach rebooten.
 
-### SSH
+### SSH konfigurieren
 
 SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden:
 
@@ -132,37 +136,43 @@ Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 - tmux
 - wget
 
-### Home Snapshots
+### Data Partition
 
-> Folgende Schritte sind auf Grund eines SELinux Konfigurationsfehlers (der hoffentlich bald gepatcht wird) nötig:
->
-> ```bash
-> semanage fcontext -a -t snapperd_data_t '/home/\.snapshots(/.*)?'
-> snapper -c home create-config /home
-> restorecon -R -v /home/.snapshots/
-> ```
+Auf der Data Partition (`/data`) werden alle **Application Daten** (Persistent Volumes) und **Application Konfigurationen** (yamls) gespeichert. Die PersitentVolumes im Storage Ordner werden zwischen Nodes syncronisiert, um überall verfügbar zu sein. Die App Config wird zur Vereinfachung der Administration ebenfalls zwischen Nodes syncronisiert.
 
-Snapshots für die Home-Partition aktivieren:
+#### Struktur
+
+- /data/
+  - kubernetes/
+    - app-config/
+      - namespaces/
+        - my-app/
+          - webserver.yaml
+            - *Deployment*
+            - Service
+            - PVC
+          - database.yaml
+            - *StatefulSet*
+            - *Service*
+            - PVC-0
+            - PVC-1
+    - storage/
+
+#### Snapshots
+
+Snapshots für die Data-Partition aktivieren:
 
 ```bash
-snapper -c home create-config /home
+semanage fcontext -a -t snapperd_data_t '/data/\.snapshots(/.*)?'
+snapper -c data create-config /data
+restorecon -R -v /data/.snapshots/
 ```
 
 Die Anzahl der Snapshots, die gemacht werden sollen, um Daten zu sichern, kann man unter `/etc/snapper/configs/` in den Konfigurationsdateien ändern.
 
-### Usermanagement
+#### Syncronisation via Syncthing
 
-Es muss der User **server** angelegt werden.
-
-Das ist am einfachsten über Cockpit möglich. Alternativ mit `useradd -mU USERNAME` und `passwd USERNAME`. Wichtig ist, dass der User seine **eigene gleichnamige Primärgruppe** und das Homeverzeichnis die Berechtigung **700** hat.
-
-Zuguterletzt muss **User Lingering** aktiviert werden, damit User Prozesse sofort bei Start des Computers hochgefahren werden und nicht erst, wenn sich der User anmeldet:
-
-```bash
-loginctl enable-linger server
-```
-
-## Kubernetes (k3s)
+## Kubernetes
 
 ### Installation
 
@@ -197,7 +207,9 @@ loginctl enable-linger server
 	firewall-cmd --reload
 	```
 
-#### Primary Server
+#### Install k3s
+
+##### Primary Server
 
 1. Install k3s
 
@@ -211,7 +223,7 @@ loginctl enable-linger server
    cat /var/lib/rancher/k3s/server/node-token
    ```
 
-#### Secondary Server
+##### Secondary Server
 
 Install k3s and join cluster using **k3s Token** and **hostname** of primary server
 
@@ -219,7 +231,7 @@ Install k3s and join cluster using **k3s Token** and **hostname** of primary ser
 curl -sfL https://get.k3s.io | K3S_TOKEN=<K3S-TOKEN> sh -s - server --disable=traefik --server https://<PRIMARY-SERVER-HOSTNAME>:6443
 ```
 
-#### etcd Server
+##### etcd Server
 
 Install k3s etcd component to complete etcd cluster. You need the **k3s Token** and **hostname** of primary/secondary server again
 
@@ -229,9 +241,11 @@ curl -sfL https://get.k3s.io | K3S_TOKEN=<K3S-TOKEN> sh -s - server --disable-ap
 
 #### Helm Package Manager
 
-#### Entrypoint Ingress (Caddy)
+### Local Provisioner
 
-#### Storage Syncronisation (Syncthing)
+
+
+#### Entrypoint Ingress (Caddy)
 
 ### Deploy Example
 
