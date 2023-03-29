@@ -84,27 +84,11 @@ Mit `zypper lr -u` Repos auflisten und alle USB/CD/DVD Repos mit `zypper rr` ent
 
 System mit `transactional-update dup` aktualisieren. Danach rebooten.
 
-### SSH konfigurieren
-
-SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden:
-
-```bash
-sudo transactional-update shell
-sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
-sed -i 's/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' /usr/etc/ssh/sshd_config
-exit
-```
-
-Anschließend das System neu starten.
-
-Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines Rechners unter *Accounts > server* eintragen.
-
 ### Cockpit installieren
 
 Cockpit und optional folgende Addons installieren (`transactional-update pkg in PAKET`):
 
 - cockpit-kdump
-- cockpit-machines
 - cockpit-networkmanager
 - cockpit-pcp
 - cockpit-podman
@@ -127,6 +111,20 @@ Cockpit Addons sind auf **tuned** angewiesen, welches über systemd aktiviert we
 ```bash
 systemctl enable --now tuned.service
 ```
+### SSH konfigurieren
+
+SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden:
+
+```bash
+sudo transactional-update shell
+sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
+sed -i 's/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' /usr/etc/ssh/sshd_config
+exit
+```
+
+Anschließend das System neu starten.
+
+Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines Rechners unter *Accounts > server* eintragen.
 
 ### Zusatzpakete installieren
 
@@ -142,10 +140,10 @@ Auf der Data Partition (`/data`) werden alle **Application Daten** (Persistent V
 
 #### Struktur
 
-- /data/
-  - kubernetes/
-    - app-config/
-      - namespaces/
+- **/data/**
+  - **kubernetes/**
+    - **resource-config/**
+      - **namespaces/**
         - my-app/
           - webserver.yaml
             - *Deployment*
@@ -156,11 +154,16 @@ Auf der Data Partition (`/data`) werden alle **Application Daten** (Persistent V
             - *Service*
             - PVC-0
             - PVC-1
-    - storage/
+    - **storage/**
+      - persistent-volume-xyz/
+
+#### Permissions
+
+Die Permissions der Data-Partition sollten auf **750** gesetzt werden.
 
 #### Snapshots
 
-Snapshots für die Data-Partition aktivieren:
+Snapshots für die Data-Partition aktivieren (`policycoreutils-python-utils` installieren, falls nicht vorhanden):
 
 ```bash
 semanage fcontext -a -t snapperd_data_t '/data/\.snapshots(/.*)?'
@@ -171,6 +174,60 @@ restorecon -R -v /data/.snapshots/
 Die Anzahl der Snapshots, die gemacht werden sollen, um Daten zu sichern, kann man unter `/etc/snapper/configs/` in den Konfigurationsdateien ändern.
 
 #### Syncronisation via Syncthing
+
+Enable Podman Socket:
+
+```bash
+systemctl enable --now podman.socket
+```
+
+Get Syncthing Image:
+
+```bash
+podman pull quay.io/oci-containers/syncthing:latest
+```
+
+Add Firewalld Rule:
+
+```bash
+firewall-cmd --permanent --add-service=syncthing
+firewall-cmd --permanent --add-port=8384/tcp
+firewall-cmd --reload
+```
+
+Create Syncthing Config Directory:
+
+```bash
+mkdir -p /opt/syncthing/
+```
+
+Run Syncthing:
+
+```bash
+podman run \
+	--detach \
+	--name=syncthing \
+	--hostname=$( hostname ) \
+	--userns=host \
+	--network=host \
+	--env PUID=0 \
+	--env GID=0 \
+	--env STGUIADDRESS=0.0.0.0:8384 \
+	--volume /opt/syncthing:/var/syncthing:Z \
+	--volume /data/kubernetes:/data0:Z \
+	quay.io/oci-containers/syncthing:latest
+```
+
+Create Systemd Service and enable it:
+
+```bash
+cd /tmp
+podman generate systemd --files --new --name syncthing
+podman stop syncthing && podman rm syncthing
+mv container-syncthing.service /etc/systemd/system/syncthing.service
+systemctl daemon-reload
+systemctl enable --now syncthing
+```
 
 ## Kubernetes
 
@@ -242,8 +299,6 @@ curl -sfL https://get.k3s.io | K3S_TOKEN=<K3S-TOKEN> sh -s - server --disable-ap
 #### Helm Package Manager
 
 ### Local Provisioner
-
-
 
 #### Entrypoint Ingress (Caddy)
 
