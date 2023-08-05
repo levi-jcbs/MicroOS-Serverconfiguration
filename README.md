@@ -49,13 +49,13 @@ Client   »»»   |  Router  |         |                    |
 
 ## Node Installation
 
-Es wird **openSUSE MicroOS** mit der Systemrolle **MicroOS Container Host** installiert. Für den **etcd Node** kann die **Standard-Systemrolle** ausgewählt werden.
+Es werden **openSUSE MicroOS**-Systeme in der Standard-Systemrolle installiert.
 
 ### Partitionierung
 
 | Festplatte         | Partition | Filesystem | Größe     |
 | ------------------ | --------- | ---------- | --------- |
-| **System M.2 SSD** | /         | btrfs      | 50GB      |
+| **System M.2 SSD** | /         | btrfs      | 100GB     |
 | **System M.2 SSD** | /var      | btrfs      | max.      |
 |                    |           |            |           |
 | **Data RAID**      | /data     | btrfs      | min. 2 TB |
@@ -66,7 +66,7 @@ Zeitzone auf **Germany**, aber Hardware Clock auf **UTC** setzen.
 
 ### Network
 
-Hostname setzen: Z.b. **firmaxyz-prod-primary** oder **firmaxyz-k8s-0**. Node muss erkennbar sein.
+Hostname setzen: Z.b. **firmaxyz-prod-primary** oder **firmaxyz-k8s-a**. Node muss erkennbar sein.
 
 ### Booting
 
@@ -82,41 +82,53 @@ Firewall aktivieren, SSH Service aktivieren und SSH port öffnen.
 
 Mit `zypper lr -u` Repos auflisten und alle USB/CD/DVD Repos mit `zypper rr` entfernen. Dieses bleibt nach der Installation manchmal übrig und es kann nicht mehr drauf zugegriffen werden, wenn das Installationsmedium entfernt wird.
 
-System mit `transactional-update dup` aktualisieren. Danach rebooten.
+System ggf. mit `transactional-update dup` aktualisieren. Danach rebooten.
 
 ### Cockpit installieren
 
-Cockpit und optional folgende Addons installieren (`transactional-update pkg in PAKET`):
+Cockpit und optional folgende Addons installieren:
 
+- cockpit
 - cockpit-kdump
 - cockpit-networkmanager
 - cockpit-pcp
-- cockpit-podman
 - cockpit-storaged
 - cockpit-tukit
 - tuned
 - tuned-profiles-atomic
 
-Danach Rebooten.
-
-Cockpit mit `systemctl enable --now cockpit.socket` aktivieren und zur Firewall hinzufügen:
+Danach Rebooten:
 
 ```bash
-firewall-cmd --add-service=cockpit --permanent
-firewall-cmd --reload
+# transactional-update pkg install cockpit cockpit-kdump cockpit-networkmanager cockpit-pcp cockpit-storaged cockpit-tukit tuned tuned-profiles-atomic
+# reboot
+```
+
+Cockpit mit aktivieren und zur Firewall hinzufügen:
+
+```bash
+# systemctl enable --now cockpit.socket
+# firewall-cmd --add-service=cockpit --permanent
+# firewall-cmd --reload
 ```
 
 Cockpit Addons sind auf **tuned** angewiesen, welches über systemd aktiviert werden muss: 
 
 ```bash
-systemctl enable --now tuned.service
+# systemctl enable --now tuned.service
 ```
-### SSH konfigurieren
-
-SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden:
+Um einen Metric-Logger nutzen zu können, muss er aktiviert werden:
 
 ```bash
-sudo transactional-update shell
+# systemctl enable --now pmlogger.service
+```
+
+### SSH konfigurieren
+
+SSH ist standardmäßig so konfiguriert, dass man sich per Password anmelden kann. Das sollte man für einen sicheren Server ändern. Folgende Befehle müssen ausgeführt werden (in der Cockpit-Konsole, dann kann man copy&paste nutzen):
+
+```bash
+# sudo transactional-update shell
 sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /usr/etc/ssh/sshd_config
 sed -i 's/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' /usr/etc/ssh/sshd_config
 exit
@@ -124,15 +136,19 @@ exit
 
 Anschließend das System neu starten.
 
-Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines Rechners unter *Accounts > server* eintragen.
+Um sich nun über SSH einzuloggen, muss man über Cockpit den Public Key seines Rechners unter *Accounts > root* eintragen.
 
 ### Zusatzpakete installieren
 
 Folgende Pakete sollten für einfachere Administration nachinstalliert werden:
 
-- emacs
+- nano
 - tmux
 - wget
+
+```bash
+# sudo transactional-update pkg install nano tmux wget
+```
 
 ### Data Partition
 
@@ -166,68 +182,12 @@ Die Permissions der Data-Partition sollten auf **750** gesetzt werden.
 Snapshots für die Data-Partition aktivieren (`policycoreutils-python-utils` installieren, falls nicht vorhanden):
 
 ```bash
-semanage fcontext -a -t snapperd_data_t '/data/\.snapshots(/.*)?'
-snapper -c data create-config /data
-restorecon -R -v /data/.snapshots/
+# semanage fcontext -a -t snapperd_data_t '/data/\.snapshots(/.*)?'
+# snapper -c data create-config /data
+# restorecon -R -v /data/.snapshots/
 ```
 
 Die Anzahl der Snapshots, die gemacht werden sollen, um Daten zu sichern, kann man unter `/etc/snapper/configs/` in den Konfigurationsdateien ändern.
-
-#### Syncronisation via Syncthing
-
-Enable Podman Socket:
-
-```bash
-systemctl enable --now podman.socket
-```
-
-Get Syncthing Image:
-
-```bash
-podman pull quay.io/oci-containers/syncthing:latest
-```
-
-Add Firewalld Rule:
-
-```bash
-firewall-cmd --permanent --add-service=syncthing
-firewall-cmd --permanent --add-port=8384/tcp
-firewall-cmd --reload
-```
-
-Create Syncthing Config Directory:
-
-```bash
-mkdir -p /opt/syncthing/
-```
-
-Run Syncthing:
-
-```bash
-podman run \
-	--detach \
-	--name=syncthing \
-	--hostname=$( hostname ) \
-	--userns=host \
-	--network=host \
-	--env PUID=0 \
-	--env GID=0 \
-	--env STGUIADDRESS=0.0.0.0:8384 \
-	--volume /opt/syncthing:/var/syncthing:Z \
-	--volume /data/kubernetes:/data0:Z \
-	quay.io/oci-containers/syncthing:latest
-```
-
-Create Systemd Service and enable it:
-
-```bash
-cd /tmp
-podman generate systemd --files --new --name syncthing
-podman stop syncthing && podman rm syncthing
-mv container-syncthing.service /etc/systemd/system/syncthing.service
-systemctl daemon-reload
-systemctl enable --now syncthing
-```
 
 ## Kubernetes
 
